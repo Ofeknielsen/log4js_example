@@ -13,7 +13,6 @@ interface LoggerConfigurations extends Configuration {
   expressMiddlewareOptions?: ExpressLoggerProperties
   httpClient?: LoggerProperties
 }
-
 interface ExtendedLoggingEvent extends LoggingEvent{
   requestId?: string
 }
@@ -66,6 +65,34 @@ function setLoggerForThisModule(): void {
   thisLogger = log4js.getLogger(convertLoggerNameToBetterName(__filename))
 }
 
+function convertLoggerNameToBetterName(loggerName: string): string {
+  const loggerNameAsFilePath = removeFileExtensionIfHas(loggerName)
+  const pathSplitByOsSeparator: string[] = loggerNameAsFilePath.split(osSeparator)
+  if (isFilePathUnderAppLocation(pathSplitByOsSeparator)) {
+    if (isIndexFile(pathSplitByOsSeparator)) { return extractRelativePathAndConvertSeparatorToDot(pathSplitByOsSeparator, false) }
+    return extractRelativePathAndConvertSeparatorToDot(pathSplitByOsSeparator, true)
+  }
+  return loggerName
+
+  function removeFileExtensionIfHas (loggerName: string): string {
+    const f = loggerName.split('.')
+    return f.length > 1 ? f.slice(0, -1).join('.') : loggerName
+  }
+
+  function isFilePathUnderAppLocation (splitByOsSeparator: string[]): boolean {
+    return splitByOsSeparator.length > currentWorkingDirectoryTreeSize
+  }
+
+  function isIndexFile (pathSplitByOsSeparator: string[]): boolean {
+    return _.last(pathSplitByOsSeparator) === 'index'
+  }
+
+  function extractRelativePathAndConvertSeparatorToDot (pathSplitByOsSeparator: String[], takeFileName: boolean): string {
+    const offset: number = takeFileName ? 0 : 1
+    return _.slice(pathSplitByOsSeparator, currentWorkingDirectoryTreeSize, pathSplitByOsSeparator.length - offset).join('.')
+  }
+}
+
 function getHttpLogInterceptors(): HttpLogInterceptors {
   if (!httpLogInterceptors) {
     httpLogInterceptors = require('./http_client/http_log_interceptors')
@@ -97,34 +124,6 @@ function watcherListener(changeType: string): void {
 function watcherErrorHandler(err: Error): void {
   if (err) { console.log('watch failed on', log4jsConfigPath, 'with error', err) }
   console.log('watch successful on', log4jsConfigPath)
-}
-
-function convertLoggerNameToBetterName(loggerName: string): string {
-  const loggerNameAsFilePath = removeFileExtensionIfHas(loggerName)
-  const pathSplitByOsSeparator: string[] = loggerNameAsFilePath.split(osSeparator)
-  if (isFilePathUnderAppLocation(pathSplitByOsSeparator)) {
-    if (isIndexFile(pathSplitByOsSeparator)) { return extractRelativePath(pathSplitByOsSeparator, false) }
-    return extractRelativePath(pathSplitByOsSeparator, true)
-  }
-  return loggerName
-
-  function removeFileExtensionIfHas (loggerName: string): string {
-    const f = loggerName.split('.')
-    return f.length > 1 ? f.slice(0, -1).join('.') : loggerName
-  }
-
-  function isFilePathUnderAppLocation (splitByOsSeparator: string[]): boolean {
-    return splitByOsSeparator.length > currentWorkingDirectoryTreeSize
-  }
-
-  function isIndexFile (pathSplitByOsSeparator: string[]): boolean {
-    return _.last(pathSplitByOsSeparator) === 'index'
-  }
-
-  function extractRelativePath (pathSplitByOsSeparator: String[], takeFileName: boolean): string {
-    const offset: number = takeFileName ? 0 : 1
-    return _.slice(pathSplitByOsSeparator, currentWorkingDirectoryTreeSize, pathSplitByOsSeparator.length - offset).join('.')
-  }
 }
 
 export function getLogger(loggerName: string): Logger {
