@@ -143,6 +143,8 @@ export function getLogger(loggerName: string): Logger {
   return logger
 }
 
+export const createExpressMiddleware = log4js.connectLogger
+
 export default {
   init,
   getLogger,

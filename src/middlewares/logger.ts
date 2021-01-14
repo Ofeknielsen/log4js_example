@@ -1,6 +1,7 @@
 'use strict'
 import { Request, Response, NextFunction } from 'express'
 import { Format } from 'log4js'
+import {createExpressMiddleware, getLogger} from '../logger'
 
 type ExpressMiddleware = (req: Request, res: Response, next: NextFunction) => void
 

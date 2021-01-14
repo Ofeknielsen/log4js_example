@@ -6,3 +6,5 @@ const { logRequestInterceptor, logResponseInterceptor } = HttpLogInterceptorsBui
 
 axios.interceptors.request.use(logRequestInterceptor)
 axios.interceptors.response.use(logResponseInterceptor)
+
+export default axios

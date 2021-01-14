@@ -12,9 +12,8 @@ let logger: any = console;
 (function(): void {
   try {
     const app: express.Application = createApp()
-    app.use()
     logger = log4js.getLogger('index')
-    app.listen(port, () => logger.info(`server started at http://localhost:${port}`))
+    app.listen(port, '0.0.0.0', () => logger.info(`server started at http://localhost:${port}`))
   } catch (e) {
     logger.error('ERROR: Server failed')
     logger.error(`ERROR: ${e.stack}`)
@@ -22,7 +21,7 @@ let logger: any = console;
 })()
 
 function setRoutes(app: express.Application): void {
-  glob.sync('**/*.routes.*').forEach((routeFile) => {
+  glob.sync('**/*.routes.{t,j}s').forEach( (routeFile) => {
     const router = require(path.resolve(routeFile))
     app.use('/', router)
   })
