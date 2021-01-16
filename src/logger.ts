@@ -131,11 +131,11 @@ export function getLogger(loggerName: string): Logger {
   const logger: Logger = log4js.getLogger(fixedLoggerName)
   const tempDebug = logger.debug.bind(logger)
 
-  function newDebugMethod (this: Logger, message: any, ...args: any[]): void {
-    if (args && typeof args[0] === 'function' && this.isDebugEnabled()) {
+  function newDebugMethod (this: Logger, message: any, firstArg:any, ...args: any[]): void {
+    if (firstArg && typeof firstArg === 'function' && this.isDebugEnabled()) {
       // @ts-expect-error
-      this._log(levels.DEBUG, [args[0]()])
-    } else { tempDebug(message, ...args) }
+      this._log(levels.DEBUG, [firstArg(args)])
+    } else { tempDebug(message, firstArg, ...args) }
   }
 
   logger.debug = newDebugMethod.bind(logger)
